@@ -3,6 +3,8 @@ package com.ataraxer.akkit
 import akka.actor.{Actor, ActorRefFactory, Props}
 import akka.actor.Actor.Receive
 
+import scala.reflect.ClassTag
+
 
 /**
  * Spawner trait defines methods for creation of simple stateless actors.
@@ -16,6 +18,9 @@ trait Spawner {
      */
     def apply(actor: => Actor) =
       context.actorOf(Props(actor))
+
+    def apply[T <: Actor : ClassTag] =
+      context.actorOf(Props[T])
 
     /**
      * Creates stateless actor with provided behaviour.
