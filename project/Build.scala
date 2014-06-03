@@ -1,6 +1,10 @@
 import sbt._
 import sbt.Keys._
 
+import com.typesafe.sbt.{SbtSite, SbtGhPages}
+import com.typesafe.sbt.SbtGhPages.GhPagesKeys._
+import com.typesafe.sbt.SbtGit.GitKeys.gitRemoteRepo
+
 
 object AkkitBuild extends Build {
 
@@ -38,14 +42,22 @@ object AkkitBuild extends Build {
         exclude("org.slf4j", "slf4j-simple")
     ),
 
+    gitRemoteRepo := "git@github.com:ataraxer/akkit.git",
+
     parallelExecution := true
   )
 
-  lazy val buildSettings = Defaults.defaultSettings ++ Seq(
-    name         := "akkit",
-    version      := "0.1.0",
-    scalaVersion := "2.10.3"
-  )
+
+  lazy val buildSettings =
+    Defaults.defaultSettings ++
+    SbtSite.site.settings ++
+    SbtSite.site.includeScaladoc() ++
+    SbtGhPages.ghpages.settings ++
+    Seq(
+      name         := "akkit",
+      version      := "0.1.0",
+      scalaVersion := "2.10.3"
+    )
 
   lazy val akkit = Project(
     id = "akkit",
