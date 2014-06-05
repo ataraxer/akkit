@@ -5,6 +5,8 @@ import com.typesafe.sbt.{SbtSite, SbtGhPages}
 import com.typesafe.sbt.SbtGhPages.GhPagesKeys._
 import com.typesafe.sbt.SbtGit.GitKeys.gitRemoteRepo
 
+import scoverage._
+
 
 object AkkitBuild extends Build {
 
@@ -53,6 +55,7 @@ object AkkitBuild extends Build {
     SbtSite.site.settings ++
     SbtSite.site.includeScaladoc() ++
     SbtGhPages.ghpages.settings ++
+    ScoverageSbtPlugin.instrumentSettings ++
     Seq(
       name         := "akkit",
       version      := "0.1.0",
