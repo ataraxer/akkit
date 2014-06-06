@@ -60,7 +60,8 @@ class CollectorSpec(_system: ActorSystem)
 
 
   it should "collect values extracted with partial function" in {
-    val collector = collect.withPF {
+
+    val collector = collect matching {
       case Foo => Bar
       case Bar => Foo
       case Content(value) => value
@@ -98,7 +99,7 @@ class CollectorSpec(_system: ActorSystem)
   it should "collect extracted by PF values, " +
             "untill required count is reached" in
   {
-    val collector = collect.countWithPF(fooCount + barCount + 1) {
+    val collector = collect.count(fooCount + barCount + 1) matching {
       case Foo => Bar
       case Bar => Foo
       case Content(value) => value

@@ -4,6 +4,101 @@ import akka.actor.{Actor, ActorRefFactory, ActorRef, Props}
 import scala.collection.mutable
 
 
+object CounterSpawner {
+  import Counter._
+
+  private def spawn(actor: => Actor)(implicit context: ActorRefFactory) =
+    context.actorOf(Props(actor))
+
+
+  class CounterGenerator(expectedSize: Int)(implicit context: ActorRefFactory) {
+    /**
+     * Spawn Counter actor that counts specified objects until expected count
+     * is exceeded.
+     */
+    def apply(objects: Any*)(implicit client: ActorRef) = spawn {
+      new Counter(client = Some(client), expectedSize = Some(expectedSize)) {
+        def expected(msg: Any) = objects contains msg
+      }
+    }
+
+    /**
+     * Spawn Counter actor that counts objects that match provided partial
+     * function until expected count is exceeded.
+     */
+    def matching(expect: CountFilter)(implicit client: ActorRef) = spawn {
+      new Counter(client = Some(client), expectedSize = Some(expectedSize)) {
+        def expected(msg: Any) = (expect orElse defaultPF)(msg)
+      }
+    }
+  }
+
+
+  class Distinct(implicit context: ActorRefFactory) {
+    /**
+     * Spawn Counter actor that counts dictinct number of specified objects.
+     */
+    def apply(objects: Any*) = spawn {
+      new Counter(distinct = true) {
+        def expected(msg: Any) = objects contains msg
+      }
+    }
+
+    /**
+     * Spawn Counter actor that counts distinct number of objects that match
+     * provided partial function.
+     */
+    def matching(expect: CountFilter) = spawn {
+      new Counter(distinct = true) {
+        def expected(msg: Any) = (expect orElse defaultPF)(msg)
+      }
+    }
+  }
+}
+
+
+trait CounterSpawner {
+  import Counter._
+  import CounterSpawner._
+
+  implicit val context: ActorRefFactory
+
+  object count {
+    /**
+     * Spawn Counter actor that counts specified objects.
+     */
+    def apply(objects: Any*) = spawn {
+      new Counter {
+        def expected(msg: Any) = objects contains msg
+      }
+    }
+
+    /**
+     * Spawn Counter actor that counts objects that match provided partial
+     * function.
+     */
+    def matching(expect: CountFilter) = spawn {
+      new Counter {
+        def expected(msg: Any) = (expect orElse defaultPF)(msg)
+      }
+    }
+
+    /**
+     * Returns a builder object that can be applied to variable number of objects
+     * or a partial function to produce new [[Counter]] with counter limit.
+     */
+    def expect(expectedSize: Int) = new CounterGenerator(expectedSize)
+
+    /**
+     * Returns a builder object that can be applied to variable number of objects
+     * or a partial function to produce new [[Counter]] which counts distinct
+     * number of macthing objects.
+     */
+    def distinct = new Distinct
+  }
+}
+
+
 object Counter {
   type CountFilter = PartialFunction[Any, Boolean]
   val defaultPF: CountFilter = { case _ => false }
@@ -14,84 +109,6 @@ object Counter {
 
   case object Flush
   case object Peak
-}
-
-
-trait CounterSpawner {
-  import Counter._
-
-  val context: ActorRefFactory
-
-  private def spawn(actor: => Actor) =
-    context.actorOf(Props(actor))
-
-  object count {
-
-    /**
-     * Spawn Counter actor that counts specified objects.
-     */
-    def apply(objects: Any*) = {
-      spawn { new Counter {
-        def expected(msg: Any) = objects contains msg
-      }}
-    }
-
-    /**
-     * Spawn Counter actor that counts objects that match provided partial
-     * function.
-     */
-    def withPF(expect: CountFilter) = {
-      spawn { new Counter {
-        def expected(msg: Any) = (expect orElse defaultPF)(msg)
-      }}
-    }
-
-    /**
-     * Spawn Counter actor that counts specified objects until expected count
-     * is exceeded.
-     */
-    def expect(expectedSize: Int)(objects: Any*)
-              (implicit client: ActorRef) = {
-      spawn {
-        new Counter(client = Some(client), expectedSize = Some(expectedSize)) {
-          def expected(msg: Any) = objects contains msg
-        }
-      }
-    }
-
-    /**
-     * Spawn Counter actor that counts objects that match provided partial
-     * function until expected count is exceeded.
-     */
-    def expectWithPF(expectedSize: Int)(expect: CountFilter)
-                    (implicit client: ActorRef) = {
-      spawn {
-        new Counter(client = Some(client), expectedSize = Some(expectedSize)) {
-          def expected(msg: Any) = (expect orElse defaultPF)(msg)
-        }
-      }
-    }
-
-    /**
-     * Spawn Counter actor that counts dictinct number of specified objects.
-     */
-    def distinct(objects: Any*) = {
-      spawn { new Counter(distinct = true) {
-        def expected(msg: Any) = objects contains msg
-      }}
-    }
-
-    /**
-     * Spawn Counter actor that counts distinct number of objects that match
-     * provided partial function.
-     */
-    def distinctWithPF(expect: CountFilter) = {
-      spawn { new Counter(distinct = true) {
-        def expected(msg: Any) = (expect orElse defaultPF)(msg)
-      }}
-    }
-
-  }
 }
 
 

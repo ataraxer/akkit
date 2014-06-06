@@ -57,7 +57,7 @@ class CounterSpec(_system: ActorSystem)
 
 
   it should "count expected messages defined by partial function" in {
-    val counter = count.withPF {
+    val counter = count matching {
       case Foo => true
       case Bar => true
       case List(Foo, Bar | Foo) => true
@@ -87,7 +87,7 @@ class CounterSpec(_system: ActorSystem)
 
 
   it should "alert client on expected count of messages defined by PF" in {
-    val counter = count.expectWithPF(fooCount + barCount + 2) {
+    val counter = count.expect(fooCount + barCount + 2).matching {
       case Foo => true
       case Bar => true
       case List(Foo, Bar | Foo) => true
@@ -117,7 +117,7 @@ class CounterSpec(_system: ActorSystem)
 
 
   it should "count distinct number of expected messages defined by PF" in {
-    val counter = count.distinctWithPF {
+    val counter = count.distinct.matching {
       case Foo => true
       case Bar => true
       case List(Foo, Bar | Foo) => true
@@ -177,5 +177,6 @@ class CounterSpec(_system: ActorSystem)
     expectMsg(Count(0))
   }
 }
+
 
 // vim: set ts=2 sw=2 et:
