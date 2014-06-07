@@ -53,7 +53,11 @@ object AkkitBuild extends Build {
       }
     },
 
+    publishMavenStyle := true,
+
     publishArtifact in Test := false,
+
+    pomIncludeRepository := { case _ => false },
 
     pomExtra := (
       <scm>
@@ -82,6 +86,7 @@ object AkkitBuild extends Build {
     ScoverageSbtPlugin.instrumentSettings ++
     Seq(
       name         := "akkit",
+      organization := "com.ataraxer",
       homepage     := Some(url("http://github.com/ataraxer/akkit")),
       licenses     := Seq("MIT License" -> url(
         "http://www.opensource.org/licenses/mit-license.php"
