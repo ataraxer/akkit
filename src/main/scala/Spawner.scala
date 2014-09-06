@@ -10,17 +10,15 @@ import scala.reflect.ClassTag
  * Spawner trait defines methods for creation of simple stateless actors.
  */
 trait Spawner {
-  val context: ActorRefFactory
-
   object spawn {
     /**
      * Creates provided actor without constructor arguments and name.
      */
-    def apply(actor: => Actor) =
-      context.actorOf(Props(actor))
+    def apply(actor: => Actor)(implicit factory: ActorRefFactory) =
+      factory.actorOf(Props(actor))
 
-    def apply[T <: Actor : ClassTag] =
-      context.actorOf(Props[T])
+    def apply[T <: Actor : ClassTag](implicit factory: ActorRefFactory) =
+      factory.actorOf(Props[T])
 
     /**
      * Creates stateless actor with provided behaviour.
@@ -28,7 +26,7 @@ trait Spawner {
      * @param behaviour Actor's behaviour.
      * @return Reference to the created actor.
      */
-    def actor(behaviour: Receive) = {
+    def actor(behaviour: Receive)(implicit factory: ActorRefFactory) = {
       spawn { new Actor {
         def receive = behaviour
       }}
@@ -41,7 +39,7 @@ trait Spawner {
      * @param reaction Actor's behaviour.
      * @return Reference to the created actor.
      */
-    def handler(reaction: Receive) = {
+    def handler(reaction: Receive)(implicit factory: ActorRefFactory) = {
       spawn { new Actor { def receive = {
         case message
           if reaction.isDefinedAt(message) =>

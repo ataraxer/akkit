@@ -28,8 +28,6 @@ class SpawnerSpec(_system: ActorSystem)
 
   def this() = this(ActorSystem("spawner-spec"))
 
-  val context = system
-
 
   "A Spawner" should "spawn actor of provided class" in {
     spawn[Echoer] shouldBe an [ActorRef]
