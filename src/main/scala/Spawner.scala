@@ -45,6 +45,8 @@ trait Spawner {
           if reaction.isDefinedAt(message) =>
             reaction(message)
             context.stop(self)
+
+        case other => context.stop(self)
       }}}
     }
   }
