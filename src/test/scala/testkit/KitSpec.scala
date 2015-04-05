@@ -3,7 +3,6 @@ package testkit
 
 import akka.actor._
 import akka.testkit._
-import akka.testkit.TestActors._
 
 import org.scalatest._
 
@@ -15,16 +14,13 @@ class KitSpec extends UnitSpec {
 
 
   "Kit" should "provide local implicit sender for a test" in new Kit {
-    val echoer = system actorOf Props[EchoActor]
-
-    echoer ! "test"
+    self ! "test"
     expectMsg("test")
   }
 
 
   it should "[1/2]: prevent messages from leaking between test cases" in new Kit {
-    val echoer = system actorOf Props[EchoActor]
-    echoer ! "leaked"
+    self ! "leaked"
   }
 
 
@@ -38,8 +34,7 @@ class KitSpec extends UnitSpec {
     "Akka TestKit with ImplicitSender" should "be created" in {}
 
     it should "process all messages via a single mailbox" in {
-      val echoer = system actorOf Props[EchoActor]
-      echoer ! "leaked"
+      self ! "leaked"
     }
 
     it should "possibly leak messages between test cases" in {
