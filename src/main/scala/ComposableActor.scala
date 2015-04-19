@@ -9,10 +9,12 @@ import akka.actor.Actor.Receive
  * registratino method, will which extend existing.
  */
 trait ComposableActor extends Actor {
+  import ComposableActor._
+
   /**
-   * Extendable receive-functions list.
+   * Extendable receive functions list.
    */
-  private var receiversList = List.empty[Receive]
+  private var receiversList = List.empty[PartialFunction[Any, Unit]]
 
   /**
    * Registers new receiving partial function, that will extend existing.
@@ -24,7 +26,12 @@ trait ComposableActor extends Actor {
   /**
    * Actor `receive` method composed of registered partial functions.
    */
-  def receive = receiversList reduce { _ orElse _ }
+  def receive = receiversList.foldLeft(EmptyReceive) { _ orElse _ }
+}
+
+
+object ComposableActor {
+  val EmptyReceive: Receive = { case _ => }
 }
 
 

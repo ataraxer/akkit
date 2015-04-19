@@ -1,6 +1,6 @@
 name := "akkit"
 
-version := "0.1.1-SNAPSHOT"
+version := "0.1.0"
 
 organization := "com.ataraxer"
 
@@ -9,7 +9,7 @@ homepage := Some(url("http://github.com/ataraxer/akkit"))
 licenses := Seq("MIT License" -> url(
   "http://www.opensource.org/licenses/mit-license.php"))
 
-scalaVersion := "2.10.4"
+scalaVersion := "2.11.6"
 
 scalacOptions ++= Seq(
   "-g:vars",
