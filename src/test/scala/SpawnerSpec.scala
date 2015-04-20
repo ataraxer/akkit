@@ -53,6 +53,16 @@ class SpawnerSpec(_system: ActorSystem)
     expectMsg(Ping)
     probe expectTerminated actor
   }
+
+
+  it should "be able to spawn context-aware anonymous actors" in {
+    val actor = spawn.actor withContext { context => {
+      case message => context.sender ! Ping
+    }}
+
+    actor ! Ping
+    expectMsg(Ping)
+  }
 }
 
 

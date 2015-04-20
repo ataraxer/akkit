@@ -1,6 +1,6 @@
 package com.ataraxer.akkit
 
-import akka.actor.{Actor, ActorRefFactory, Props}
+import akka.actor._
 import akka.actor.Actor.Receive
 
 import scala.reflect.ClassTag
@@ -19,6 +19,35 @@ trait Spawner {
 
     def apply[T <: Actor : ClassTag](implicit factory: ActorRefFactory) =
       factory.actorOf(Props[T])
+
+
+    object actor {
+      /**
+       * Creates stateless actor with provided behaviour.
+       *
+       * @param behaviour Actor's behaviour.
+       * @return Reference to the created actor.
+       */
+      def apply(behaviour: Receive)(implicit factory: ActorRefFactory) = {
+        spawn { new Actor {
+          def receive = behaviour
+        }}
+      }
+
+      /**
+       * Creates a stateless actor which can access it's context.
+       */
+      def withContext
+        (behaviour: ActorContext => Receive)
+        (implicit factory: ActorRefFactory) =
+      {
+        spawn { new Actor {
+          def receive = {
+            case message => behaviour(context)(message)
+          }
+        }}
+      }
+    }
 
     /**
      * Creates stateless actor with provided behaviour.
