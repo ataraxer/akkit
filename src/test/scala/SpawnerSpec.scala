@@ -8,6 +8,7 @@ import scala.concurrent.duration._
 
 object SpawnerSpec {
   case object Ping
+  case object Pong
   case object Done
 
   class Echoer extends Actor {
@@ -51,6 +52,20 @@ class SpawnerSpec(_system: ActorSystem)
     probe watch actor
     actor ! Ping
     expectMsg(Ping)
+    probe expectTerminated actor
+  }
+
+
+  it should "spawn anonymous context-aware one-time actors" in {
+    val actor = spawn.handler withContext { context => {
+      case Ping => context.sender ! Pong
+    }}
+
+    val probe = TestProbe()
+    probe watch actor
+
+    actor ! Ping
+    expectMsg(Pong)
     probe expectTerminated actor
   }
 

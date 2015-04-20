@@ -49,34 +49,33 @@ trait Spawner {
       }
     }
 
-    /**
-     * Creates stateless actor with provided behaviour.
-     *
-     * @param behaviour Actor's behaviour.
-     * @return Reference to the created actor.
-     */
-    def actor(behaviour: Receive)(implicit factory: ActorRefFactory) = {
-      spawn { new Actor {
-        def receive = behaviour
-      }}
-    }
 
-    /**
-     * Creates stateless actor with provided behaviour, that will handle only one
-     * message that he can handle and self-destruct.
-     *
-     * @param reaction Actor's behaviour.
-     * @return Reference to the created actor.
-     */
-    def handler(reaction: Receive)(implicit factory: ActorRefFactory) = {
-      spawn { new Actor { def receive = {
-        case message
-          if reaction.isDefinedAt(message) =>
-            reaction(message)
-            context.stop(self)
+    object handler {
+      /**
+       * Creates stateless actor with provided behaviour, that will handle
+       * only one message that he can handle and self-destruct.
+       *
+       * @param reaction Actor's behaviour.
+       * @return Reference to the created actor.
+       */
+      def apply(reaction: Receive)(implicit factory: ActorRefFactory) = {
+        handler withContext { context => reaction }
+      }
 
-        case other => context.stop(self)
-      }}}
+      /**
+       * Creates context-aware actor with provided behaviour, that will handle
+       * only one message that he can handle and self-destruct.
+       */
+      def withContext
+        (reaction: ActorContext => Receive)
+        (implicit factory: ActorRefFactory) =
+      {
+        actor withContext { context => { case message =>
+          val receive = reaction(context)
+          if (receive isDefinedAt message) receive(message)
+          context.stop(context.self)
+        }}
+      }
     }
   }
 }
