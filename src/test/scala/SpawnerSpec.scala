@@ -102,6 +102,31 @@ class SpawnerSpec(_system: ActorSystem)
     adapterOne ! Ping
     probe.expectMsg(Pong)
   }
+
+
+  it should "spawn one-time message routers" in {
+    val pinger = TestProbe()
+    val ponger = TestProbe()
+
+    def router = spawn router {
+      case Ping => pinger.ref
+      case Pong => ponger.ref
+    }
+
+    router ! Ping
+    pinger.expectMsg(Ping)
+
+    router ! Pong
+    ponger.expectMsg(Pong)
+  }
+
+
+  it should "spawn one-time message router bound to given actor" in {
+    val pinger = TestProbe()
+    val router = spawn.router.to(pinger.ref)
+    router ! Ping
+    pinger.expectMsg(Ping)
+  }
 }
 
 

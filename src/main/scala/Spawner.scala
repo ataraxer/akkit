@@ -6,19 +6,24 @@ import akka.actor.Actor.Receive
 import scala.reflect.ClassTag
 
 
+object Spawner extends Spawner
+
+
 /**
  * Spawner trait defines methods for creation of simple stateless actors.
  */
 trait Spawner {
   object spawn {
     /**
-     * Creates provided actor without constructor arguments and name.
+     * Creates provided actor without constructor arguments.
      */
-    def apply(actor: => Actor)(implicit factory: ActorRefFactory) =
-      factory.actorOf(Props(actor))
+    def apply(actor: => Actor)(implicit factory: ActorRefFactory) = {
+      factory actorOf Props(actor)
+    }
 
-    def apply[T <: Actor : ClassTag](implicit factory: ActorRefFactory) =
-      factory.actorOf(Props[T])
+    def apply[T <: Actor : ClassTag](implicit factory: ActorRefFactory) = {
+      factory actorOf Props[T]
+    }
 
 
     object actor {
@@ -29,9 +34,7 @@ trait Spawner {
        * @return Reference to the created actor.
        */
       def apply(behaviour: Receive)(implicit factory: ActorRefFactory) = {
-        spawn { new Actor {
-          def receive = behaviour
-        }}
+        actor withContext { context => behaviour }
       }
 
       /**
@@ -75,6 +78,29 @@ trait Spawner {
             else message
           }
         }}
+      }
+    }
+
+
+    object router {
+      /**
+       * Creates an actor, which routes messages based on partial function.
+       */
+      def apply
+        (route: PartialFunction[Any, ActorRef])
+        (implicit factory: ActorRefFactory) =
+      {
+        handler withContext { implicit context => {
+          case message if route isDefinedAt message =>
+            route(message) forward message
+        }}
+      }
+
+      /**
+       * Creates an actor, which routes all messages to a specified actor.
+       */
+      def to(client: ActorRef)(implicit factory: ActorRefFactory) = {
+        spawn router { case message => client }
       }
     }
 
