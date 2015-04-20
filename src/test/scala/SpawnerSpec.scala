@@ -78,6 +78,30 @@ class SpawnerSpec(_system: ActorSystem)
     actor ! Ping
     expectMsg(Ping)
   }
+
+
+  it should "spawn one-time message adapters" in {
+    val adapterOne = spawn adapter { case Ping => Pong }
+
+    adapterOne ! Ping
+    expectMsg(Pong)
+
+    val adapterTwo = spawn adapter { case Ping => Pong }
+    val echoer = spawn[Echoer]
+    echoer.tell(Ping, adapterTwo)
+    expectMsg(Pong)
+  }
+
+
+  it should "spawn one-time message adapter with specified respondent" in {
+    val probe = TestProbe()
+    val adapterOne = spawn.adapter.to(probe.ref) {
+      case Ping => Pong
+    }
+
+    adapterOne ! Ping
+    probe.expectMsg(Pong)
+  }
 }
 
 

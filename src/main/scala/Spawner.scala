@@ -41,9 +41,38 @@ trait Spawner {
         (behaviour: ActorContext => Receive)
         (implicit factory: ActorRefFactory) =
       {
-        spawn { new Actor {
-          def receive = {
-            case message => behaviour(context)(message)
+        spawn { new Actor { def receive = {
+          case message => behaviour(context)(message)
+        }}}
+      }
+    }
+
+
+    object adapter {
+      /**
+       * Creates a transient actor which will receive a message, transform it
+       * if applicable and forward the result back to it's creator.
+       */
+      def apply
+        (adapt: PartialFunction[Any, Any])
+        (implicit factory: ActorRefFactory, client: ActorRef) =
+      {
+        adapter.to(client)(adapt)
+      }
+
+      /**
+       * Creates a transient actor which will receive a message, transform it
+       * if applicable and forward the result back to specified responder.
+       */
+      def to
+        (client: ActorRef)
+        (adapt: PartialFunction[Any, Any])
+        (implicit factory: ActorRefFactory) =
+      {
+        handler withContext { implicit context => {
+          case message => client forward {
+            if (adapt isDefinedAt message) adapt(message)
+            else message
           }
         }}
       }
