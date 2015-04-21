@@ -9,7 +9,7 @@ import scala.annotation.compileTimeOnly
 
 
 @compileTimeOnly("Enable macro paradise to expand macro annotations.")
-class safeActor extends StaticAnnotation {
+class safeActor(val dispatcher: String) extends StaticAnnotation {
   def macroTransform(annottees: Any*): Any = macro SafeActorMacro.impl
 }
 
@@ -24,6 +24,15 @@ private class SafeActorMacro(val c: Context) {
     val actorName = name.toTypeName
     val namedRef = TypeName(actorName + "Ref")
 
+    val propsExpression = c.prefix.tree match {
+      case q"new safeActor($dispatcher)" =>
+        q"props.withDispatcher($dispatcher)"
+
+      case q"new safeActor" => q"props"
+      case _ => c.abort(c.enclosingPosition, "Invalid annotation parameter")
+    }
+
+
     q"""
       import akka.actor.{Props, ActorRefFactory}
 
@@ -32,7 +41,7 @@ private class SafeActorMacro(val c: Context) {
 
       def props(..$fields): akkit.SafeProps[$name] = {
         val props = akka.actor.Props { new $name(..${fields.map(_.name)}) }
-        akkit.SafeProps[$name](props)
+        akkit.SafeProps[$name]($propsExpression)
       }
 
       def apply(..$fields)(implicit factory: akka.actor.ActorRefFactory) = {

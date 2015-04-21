@@ -83,6 +83,14 @@ class SafeActorMacroSpec
   }
 
 
+  it should "generate `Props` with specified default dispatcher" in {
+    @safeActor("foo-dispatcher")
+    class Foo extends Pinger
+
+    Foo.props().dispatcher should be ("foo-dispatcher")
+  }
+
+
   it should "be awesome" in {
     val dumby = Dumby("duh")
     val smarty = Smarty(dumby)
