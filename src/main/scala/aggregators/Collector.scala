@@ -90,6 +90,13 @@ abstract class Collector(
   def expected(msg: Any): Boolean
   def extract(msg: Any): Any = msg
 
+  expectedSize foreach { size =>
+    if (size <= 0) {
+      client foreach { _ ! Collection(result) }
+      context.stop(self)
+    }
+  }
+
   def isDone = expectedSize match {
     case Some(size) => result.size == size
     case None => false
@@ -106,7 +113,7 @@ abstract class Collector(
     case msg if expected(msg) => {
       result :+= extract(msg)
       if (isDone) {
-        client map { _ ! Collection(result) }
+        client foreach { _ ! Collection(result) }
         context.stop(self)
       }
     }

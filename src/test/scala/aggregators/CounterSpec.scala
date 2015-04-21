@@ -176,6 +176,15 @@ class CounterSpec(_system: ActorSystem)
 
     expectMsg(Count(0))
   }
+
+
+  it should "immediately return on non-positive expected size" in {
+    count.expect(0)(Foo)
+    expectMsg(Done)
+
+    count.expect(-1)(Foo)
+    expectMsg(Done)
+  }
 }
 
 

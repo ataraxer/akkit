@@ -124,6 +124,13 @@ abstract class Counter(
 
   def expected(msg: Any): Boolean
 
+  expectedSize foreach { size =>
+    if (size <= 0) {
+      client foreach { _ ! Done }
+      context.stop(self)
+    }
+  }
+
   def isDone = expectedSize match {
     case Some(size) => result.map(_._2).sum == size
     case None => false

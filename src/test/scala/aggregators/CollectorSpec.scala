@@ -149,6 +149,15 @@ class CollectorSpec(_system: ActorSystem)
 
     expectMsg(Collection(Nil))
   }
+
+
+  it should "immediately return on non-positive expected size" in {
+    collect.count(0)(Foo)
+    expectMsg(Collection(Nil))
+
+    collect.count(-1)(Foo)
+    expectMsg(Collection(Nil))
+  }
 }
 
 
