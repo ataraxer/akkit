@@ -2,12 +2,11 @@ import SonatypeKeys._
 
 
 val commonSettings = Seq(
-  version := "0.1.0-SNAPSHOT",
+  version := "0.1.0",
   organization := "com.ataraxer",
   homepage := Some(url("http://github.com/ataraxer/akkit")),
 
   scalaVersion := "2.11.6",
-  crossScalaVersions := Seq("2.10.5", "2.11.6"),
 
   licenses := Seq("MIT License" -> url(
     "http://www.opensource.org/licenses/mit-license.php")),
