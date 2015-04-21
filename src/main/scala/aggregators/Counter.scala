@@ -1,4 +1,5 @@
-package com.ataraxer.akkit.aggregator
+package akkit
+package aggregator
 
 import akka.actor.{Actor, ActorRefFactory, ActorRef, Props}
 import scala.collection.mutable

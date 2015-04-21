@@ -1,4 +1,4 @@
-package com.ataraxer.akkit
+package akkit
 
 import akka.actor.Actor
 import akka.actor.Actor.Receive

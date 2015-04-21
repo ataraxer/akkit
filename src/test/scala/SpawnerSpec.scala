@@ -1,4 +1,4 @@
-package com.ataraxer.akkit
+package akkit
 
 import akka.testkit.{TestKit, TestActorRef, TestProbe, ImplicitSender}
 import akka.actor.{ActorSystem, Actor, ActorRef}

@@ -1,4 +1,5 @@
-package com.ataraxer.akkit.testkit
+package akkit
+package testkit
 
 import akka.actor._
 import akka.testkit._

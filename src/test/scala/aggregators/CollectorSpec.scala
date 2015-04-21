@@ -1,6 +1,5 @@
-package com.ataraxer.akkit.aggregator
-
-import com.ataraxer.akkit.UnitSpec
+package akkit
+package aggregator
 
 import org.scalatest._
 

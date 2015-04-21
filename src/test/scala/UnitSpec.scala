@@ -1,4 +1,4 @@
-package com.ataraxer.akkit
+package akkit
 
 import org.scalatest._
 
