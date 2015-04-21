@@ -1,84 +1,75 @@
-name := "akkit"
+import SonatypeKeys._
 
-version := "0.1.0"
 
-organization := "com.ataraxer"
+val commonSettings = Seq(
+  version := "0.1.0-SNAPSHOT",
+  organization := "com.ataraxer",
+  homepage := Some(url("http://github.com/ataraxer/akkit")),
 
-homepage := Some(url("http://github.com/ataraxer/akkit"))
+  scalaVersion := "2.11.6",
+  crossScalaVersions := Seq("2.10.5", "2.11.6"),
 
-licenses := Seq("MIT License" -> url(
-  "http://www.opensource.org/licenses/mit-license.php"))
+  licenses := Seq("MIT License" -> url(
+    "http://www.opensource.org/licenses/mit-license.php")),
 
-scalaVersion := "2.11.6"
+  scalacOptions ++= Seq(
+    "-g:vars",
+    "-deprecation",
+    "-unchecked",
+    "-feature",
+    "-Xlint",
+    "-Xfatal-warnings"))
 
-scalacOptions ++= Seq(
-  "-g:vars",
-  "-deprecation",
-  "-unchecked",
-  "-feature",
-  "-Xlint",
-  "-Xfatal-warnings")
 
-/* ==== DEPENDENCIES ==== */
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor"   % "2.3.9",
-  "com.typesafe.akka" %% "akka-slf4j"   % "2.3.9",
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.9",
-  "org.scalatest" %% "scalatest" % "2.2.4" % "test",
-  "log4j" % "log4j" % "1.2.15" excludeAll (
-    ExclusionRule(organization = "com.sun.jdmk"),
-    ExclusionRule(organization = "com.sun.jmx"),
-    ExclusionRule(organization = "javax.jmx")),
-  "org.slf4j" % "slf4j-log4j12" % "1.7.5"
-    exclude("org.slf4j", "slf4j-simple"))
+val akkaVersion = "2.3.9"
 
-/* ==== PUBLISHING ==== */
-publishTo <<= version { (ver: String) =>
-  val nexus = "http://nexus.ataraxer.com/nexus/"
-  if (ver.trim.endsWith("SNAPSHOT")) {
-    Some("Snapshots" at nexus + "content/repositories/snapshots")
-  } else {
-    Some("Releases"  at nexus + "content/repositories/releases")
+val dependencies = Seq(
+  libraryDependencies ++= Seq(
+    "com.typesafe.akka" %% "akka-actor" % akkaVersion,
+    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
+    "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
+    "org.scalatest" %% "scalatest" % "2.2.4" % "test"))
+
+
+val publishingSettings = sonatypeSettings ++ Seq(
+  publishArtifact in Test := false,
+  profileName := "ataraxer",
+  pomExtra := (
+    <scm>
+      <url>git@github.com:ataraxer/akkit.git</url>
+      <connection>scm:git:git@github.com:ataraxer/akkit.git</connection>
+    </scm>
+    <developers>
+      <developer>
+        <id>ataraxer</id>
+        <name>Anton Karamanov</name>
+        <url>github.com/ataraxer</url>
+      </developer>
+    </developers>))
+
+
+val ghPagesSettings = {
+  site.settings ++
+  ghpages.settings ++
+  site.includeScaladoc("") ++ Seq {
+    git.remoteRepo := "git@github.com:ataraxer/akkit.git"
   }
 }
 
-publishMavenStyle := true
 
-publishArtifact in Test := false
-
-pomIncludeRepository := { case _ => false }
-
-pomExtra := (
-  <scm>
-    <url>git@github.com:ataraxer/akkit.git</url>
-    <connection>scm:git:git@github.com:ataraxer/akkit.git</connection>
-  </scm>
-  <developers>
-    <developer>
-      <id>ataraxer</id>
-      <name>Anton Karamanov</name>
-      <url>github.com/ataraxer</url>
-    </developer>
-  </developers>)
-
-/* ==== PLUGINS ==== */
-// Scoverage support
-instrumentSettings
-
-// Site publishing (API)
-site.settings
-
-site.includeScaladoc()
-
-ghpages.settings
-
-git.remoteRepo := "git@github.com:ataraxer/akkit.git"
-
-/* ==== OTHER ==== */
-testOptions in Test += Tests.Setup { classLoader =>
-  classLoader
-  .loadClass("org.slf4j.LoggerFactory")
-  .getMethod("getLogger", classLoader.loadClass("java.lang.String"))
-  .invoke(null, "ROOT")
+val projectSettings = {
+  commonSettings ++
+  instrumentSettings ++
+  publishingSettings ++
+  dependencies
 }
+
+
+lazy val akkit = (project in file("."))
+  .aggregate(akkitCore)
+
+lazy val akkitCore = (project in file("akkit-core"))
+  .settings(name := "akkit-core")
+  .settings(projectSettings: _*)
+  .settings(ghPagesSettings: _*)
 

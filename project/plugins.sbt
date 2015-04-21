@@ -1,8 +1,12 @@
-resolvers += Classpaths.sbtPluginReleases
+addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "0.99.2.2")
 
-addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "0.99.5.1")
+addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "0.8.0")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "0.2.2")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "0.8.1")
+
+addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.3")
+
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.7.2")
 
