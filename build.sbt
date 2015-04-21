@@ -26,9 +26,14 @@ val akkaVersion = "2.3.9"
 val dependencies = Seq(
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaVersion,
-    "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     "com.typesafe.akka" %% "akka-testkit" % akkaVersion,
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"))
+
+
+val macroDependencies = Seq(
+  libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0-M5"
+    cross CrossVersion.full))
 
 
 val publishingSettings = sonatypeSettings ++ Seq(
@@ -66,10 +71,16 @@ val projectSettings = {
 
 
 lazy val akkit = (project in file("."))
-  .aggregate(akkitCore)
+  .aggregate(akkitCore, akkitMacro)
 
 lazy val akkitCore = (project in file("akkit-core"))
   .settings(name := "akkit-core")
   .settings(projectSettings: _*)
   .settings(ghPagesSettings: _*)
+
+lazy val akkitMacro = (project in file("akkit-macro"))
+  .settings(name := "akkit-macro")
+  .dependsOn(akkitCore % "test->test")
+  .settings(projectSettings: _*)
+  .settings(macroDependencies: _*)
 
