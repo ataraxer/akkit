@@ -25,17 +25,19 @@ private class SafeActorMacro(val c: Context) {
     val namedRef = TypeName(actorName + "Ref")
 
     q"""
-      type Ref = SafeRef[$actorName]
+      import akka.actor.{Props, ActorRefFactory}
+
+      type Ref = akkit.SafeRef[$actorName]
       type $namedRef = Ref
 
-      def props(..$fields): SafeProps[$name] = {
-        val props = Props { new $name(..${fields.map(_.name)}) }
-        SafeProps[$name](props)
+      def props(..$fields): akkit.SafeProps[$name] = {
+        val props = akka.actor.Props { new $name(..${fields.map(_.name)}) }
+        akkit.SafeProps[$name](props)
       }
 
-      def apply(..$fields)(implicit factory: ActorRefFactory) = {
+      def apply(..$fields)(implicit factory: akka.actor.ActorRefFactory) = {
         val actor = factory actorOf this.props(..${fields.map(_.name)})
-        SafeRef[$name](actor)
+        akkit.SafeRef[$name](actor)
       }
     """
   }
